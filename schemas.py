@@ -12,9 +12,9 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List, Literal
 
-# Example schemas (replace with your own):
+# Example schemas (you can keep these around for reference)
 
 class User(BaseModel):
     """
@@ -38,11 +38,55 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
 # --------------------------------------------------
+# Bulghousing schemas
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+BULGARIAN_REGIONS = [
+    "Blagoevgrad",
+    "Burgas",
+    "Dobrich",
+    "Gabrovo",
+    "Haskovo",
+    "Kardzhali",
+    "Kyustendil",
+    "Lovech",
+    "Montana",
+    "Pazardzhik",
+    "Pernik",
+    "Pleven",
+    "Plovdiv",
+    "Razgrad",
+    "Ruse",
+    "Shumen",
+    "Silistra",
+    "Sliven",
+    "Smolyan",
+    "Sofia City",
+    "Sofia Province",
+    "Stara Zagora",
+    "Targovishte",
+    "Varna",
+    "Veliko Tarnovo",
+    "Vidin",
+    "Vratsa",
+    "Yambol",
+]
+
+class Property(BaseModel):
+    """
+    Real estate properties across Bulgarian regions
+    Collection name: "property"
+    """
+    title: str = Field(..., description="Listing title")
+    region: Literal[tuple(BULGARIAN_REGIONS)] = Field(..., description="Region in Bulgaria")
+    address: Optional[str] = Field(None, description="Street address or area")
+    description: Optional[str] = Field(None, description="Short description")
+    size_sqm: float = Field(..., gt=0, description="Area in square meters")
+    currency: Literal["EUR", "BGN"] = Field("EUR", description="Currency of the provided price")
+    price_value: float = Field(..., gt=0, description="Price numeric value in the provided currency")
+    images: Optional[List[str]] = Field(default=None, description="Optional image URLs")
+
+class PropertyStored(Property):
+    """Extended fields stored for efficient filtering"""
+    price_eur: float = Field(..., gt=0)
+    price_bgn: float = Field(..., gt=0)
